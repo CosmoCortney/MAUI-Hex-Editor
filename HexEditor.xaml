@@ -3,9 +3,10 @@
     x:Class="HexEditor.HexEditor"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:HexEditor">
+    xmlns:local="clr-namespace:HexEditor"
+    x:Name="hexEditor">
 
-    <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto">
+    <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto, Auto">
 
         <Entry
             x:Name="CurrentOffset"
@@ -14,11 +15,22 @@
             FontFamily="Consolas"
             HeightRequest="20"
             HorizontalTextAlignment="Start"
+            IsVisible="True"
             MaxLength="16"
             MinimumHeightRequest="20"
             MinimumWidthRequest="70"
             Text="0"
             TextColor="#FFFFFF" />
+
+        <Editor
+            x:Name="OffsetList"
+            Grid.Row="1"
+            Grid.Column="0"
+            FontFamily="Consolas"
+            IsReadOnly="True"
+            IsVisible="True"
+            MaxLength="512"
+            TextColor="#CCCCFF" />
 
         <Label
             x:Name="BytesHeader"
@@ -27,39 +39,53 @@
             Margin="12,0,0,0"
             Padding="0"
             FontFamily="Consolas"
+            IsVisible="True"
             Text="00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"
             TextColor="#CCCCFF" />
 
-        <VerticalStackLayout
-            x:Name="OffsetList"
-            Grid.Row="1"
-            Grid.Column="0"
-            Margin="0,3,0,0"
-            Spacing="-0.375" />
-
-
         <Editor
-            x:Name="HexEditOriginal"
+            x:Name="HexEditorBytes"
             Grid.Row="1"
             Grid.Column="1"
+            BindingContext="{x:Reference hexEditor}"
             FontFamily="Consolas"
-            MaxLength="512"
+            MaxLength="1537"
             TextChanged="onHexEditTextChanged"
             TextTransform="Uppercase">
 
+            <Editor.Behaviors>
+                <local:HexEditorBehavior />
+            </Editor.Behaviors>
 
             <Editor.GestureRecognizers>
                 <TapGestureRecognizer Tapped="onEditorTapped" />
             </Editor.GestureRecognizers>
         </Editor>
 
+        <Picker
+            x:Name="EncodingPicker"
+            Grid.Row="0"
+            Grid.Column="2"
+            FontSize="11"
+            HeightRequest="20"
+            MinimumHeightRequest="20"
+            SelectedIndex="0"
+            SelectedIndexChanged="onEncodingPickerIndexChanged"
+            SelectedItem="0">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}" />
+            </Picker.ItemsSource>
+        </Picker>
 
-
-
+        <Editor
+            x:Name="EncodedStrings"
+            Grid.Row="1"
+            Grid.Column="2"
+            FontFamily="Consolas"
+            IsReadOnly="True"
+            IsVisible="True"
+            MaxLength="512" />
 
     </Grid>
-
-
-
 
 </ContentView>
