@@ -486,7 +486,7 @@ namespace HexEditor
 
                 if (pos % 3 == 0 && pos != 0) //reset if char entered at an illegal position
                 {
-                    e.Handler = true;
+                    //e.Handler = true;
                     await setEditorTextAsync(editor, e.OldTextValue);
                     _isTextChanging = false;
                     return;
@@ -563,7 +563,6 @@ namespace HexEditor
             Device.BeginInvokeOnMainThread(() =>
             {
                 //editor.TextChanged -= onHexEditTextChanged;
-                editor.Text = text;
                 //editor.TextChanged += onHexEditTextChanged;
                 tcs.SetResult(true); // Signal that the UI update is complete
             });
