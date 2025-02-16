@@ -162,11 +162,11 @@ namespace HexEditor
         {
             InitializeComponent();
             //this.BindingContext = this;
-            initTestData();
+            //initTestData();
             setupEncodingPicker();
-            initHexEditorBytes();
-            setOffsetArea();
-            setEncodedStrings();
+            //initHexEditorBytes();
+            //setOffsetArea();
+           // setEncodedStrings();
 
             Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("CurrentOffset", (handler, view) =>
             {
@@ -273,7 +273,27 @@ namespace HexEditor
         }
 
         //public bool _IsReadOnly { get; set; }
-        public UInt64 _BaseAddress { get; set; }
+        private UInt64 _baseAddressFR = 0;
+        public UInt64 _BaseAddress
+        {
+            get => _baseAddressFR;
+            set 
+            {
+                _baseAddressFR = value & 0xFFFFFFFFFFFFFFF0;
+            }
+        }
+        private UInt64 _fileOffset = 0;
+        private UInt64 _currentOffsetFR = 0;
+        public UInt64 _CurrentOffset
+        {
+            get => _currentOffsetFR;
+            set
+            {
+                _currentOffsetFR = value & 0xFFFFFFFFFFFFFFF0;
+                _fileOffset = _CurrentOffset - _BaseAddress;
+                _viewPosition = _fileOffset;
+            }
+        }
         public bool _IsBigEndian { get; set; }
         private bool _showAddressesFR = true;
         public bool _ShowAddressArea
@@ -309,7 +329,8 @@ namespace HexEditor
         public byte[] _Bytes { get; set; }
         public string _BytesAsString { get; set; }
         public string _BytesAsStringFormatted { get; set; }
-        public UInt64 _PosBytes { get; set; }
+        private UInt64 _viewPosition = 0;
+        public UInt64 _PosBytesRelative { get; set; } //relative to _fileOffset
         public UInt64 _PosBytesString { get; set; }
         public UInt64 _PosBytesStringFormatted { get; set; }
         public UInt64 _SelectedPosBytes { get; set; }
@@ -334,9 +355,9 @@ namespace HexEditor
         public void UpdateOffset()
         {
             _PosBytesStringFormatted = (UInt64)HexEditorBytes.CursorPosition;
-            _PosBytes = _PosBytesStringFormatted / 3;
-            _PosBytesString = _PosBytes * 2;
-            CurrentOffset.Text = (_BaseAddress + _PosBytes).ToString("X");
+            _PosBytesRelative = _PosBytesStringFormatted / 3;
+            //_PosBytesString = _PosBytes * 2;
+            CurrentOffset.Text = (_BaseAddress + _PosBytesRelative + _fileOffset).ToString("X");
 
             if (((_PosBytesStringFormatted+1) % 3 == 0) && _PosBytesStringFormatted != 0)
                 ++HexEditorBytes.CursorPosition;
@@ -346,13 +367,38 @@ namespace HexEditor
             setEncodedStrings();
         }
 
+        private void onEnterPressed(object sender, EventArgs e)
+        {
+            _CurrentOffset = Convert.ToUInt64(CurrentOffset.Text, 16);
+            formatBytesString();
+            setEditorTextAsync(HexEditorBytes, _BytesAsStringFormatted);
+            setOffsetArea();
+            setEncodedStrings();
+            CurrentOffset.Text = _CurrentOffset.ToString("X");
+        }
+
+        private UInt32 getNextBytesAmount()
+        {
+            _fileOffset = _currentOffsetFR - _baseAddressFR;
+            UInt32 bytesAmount = 0x200;
+
+            if (_Bytes.Length < bytesAmount)
+                bytesAmount = (UInt32)_Bytes.Length;
+
+            if (bytesAmount > (UInt32)_Bytes.Length - _fileOffset)
+                bytesAmount = (UInt32)_Bytes.Length - (UInt32)_fileOffset;
+
+            return bytesAmount;
+        }
+
         private async Task formatBytesString()
         {
             _BytesAsString = "";
             _BytesAsStringFormatted = "";
+            UInt32 bytesAmount = getNextBytesAmount();
 
-            for (int i = 0; i < _Bytes.Length; ++i)
-                _BytesAsString += _Bytes[i].ToString("X2");
+            for (UInt64 i = 0; i < bytesAmount; ++i)
+                _BytesAsString += _Bytes[_fileOffset + i].ToString("X2");
 
             for (int i = 0; i < _BytesAsString.Length; i += 2)
             {
@@ -368,12 +414,23 @@ namespace HexEditor
         private void setOffsetArea()
         {
             string tempStr = "";
+            UInt32 bytesAmount = getNextBytesAmount();
 
-            for (int i = 0; i <= 0x1F0; i += 0x10)
+            if (bytesAmount >= 0x1F1)
+                bytesAmount = 0x1F0;
+            else
             {
-                tempStr += (_BaseAddress + (UInt64)i).ToString("X2");
+                if ((bytesAmount & 0xF) == 0)
+                    bytesAmount -= 0x10;
+                else
+                    bytesAmount = bytesAmount & 0xFFFFFFF0;
+            }
 
-                if (i < 0x1F0)
+            for (int i = 0; i <= bytesAmount; i += 0x10)
+            {
+                tempStr += (_CurrentOffset + (UInt64)i).ToString("X2");
+
+                if (i < bytesAmount)
                     tempStr += '\n';
             }
 
@@ -385,25 +442,33 @@ namespace HexEditor
             if (_Bytes == null || _Bytes.Length == 0)
                 return;
 
+            UInt32 bytesAmount = getNextBytesAmount();
+
+            if (bytesAmount >= 0x1F1)
+                bytesAmount = 0x1F0;
+            else
+            {
+                if ((bytesAmount & 0xF) == 0)
+                    bytesAmount -= 0x10;
+                else
+                    bytesAmount = bytesAmount & 0xFFFFFFF0;
+            }
+
             Int32 inputEncoding = (Int32)((StringEncodingPickerItem)EncodingPicker.SelectedItem).Id;
             string tempStr = "";
-            int count = 32;
-
-            if (_Bytes.Length < 32 * 16)
-                count = (32 * 16) % _Bytes.Length;
 
             switch (inputEncoding)
             {
                 case (Int32)StringEncodings.UTF16LE:
                 case (Int32)StringEncodings.UTF16BE:
                 {
-                    for (Int32 i = 0; i <= 0x1F0; i += 0x10)
+                    for (UInt64 i = 0; i <= bytesAmount; i += 0x10)
                     {
                         char[] tempChars = new char[8];
 
-                        for(int c = 0; c < 8; ++c)
+                        for(UInt64 c = 0; c < 8; ++c)
                         {
-                            tempChars[c] = (char)((Int32)_Bytes[i + c * 2] | ((Int32)_Bytes[i + c * 2 + 1]) << 8);
+                            tempChars[c] = (char)((Int32)_Bytes[_fileOffset + i + c * 2] | ((Int32)_Bytes[_fileOffset + i + c * 2 + 1]) << 8);
                         }
 
                         for (Int32 c = 0; c < 8; ++c)
@@ -420,7 +485,7 @@ namespace HexEditor
                         FreeMemoryWcharPtr(resultPtr);
                         tempStr += tempLine;
 
-                        if (i < 0x1F0)
+                        if (i < bytesAmount)
                             tempStr += '\n';
                     }
                 }
@@ -428,14 +493,14 @@ namespace HexEditor
                 case (Int32)StringEncodings.UTF32LE:
                 case (Int32)StringEncodings.UTF32BE:
                 {
-                    for (Int32 i = 0; i <= 0x1F0; i += 0x10)
+                    for (UInt64 i = 0; i <= bytesAmount; i += 0x10)
                     {
                         UInt32[] tempChars = new UInt32[4];
 
-                        for (int c = 0; c < 4; ++c)
+                        for (UInt64 c = 0; c < 4; ++c)
                         {
-                            tempChars[c] = (UInt32)_Bytes[i + c * 4] | ((UInt32)_Bytes[i + c * 4 + 1] << 8)
-                                | ((UInt32)_Bytes[i + c * 4 + 2] << 16) | ((UInt32)_Bytes[i + c * 4 + 3] << 24);
+                            tempChars[c] = (UInt32)_Bytes[_fileOffset + i + c * 4] | ((UInt32)_Bytes[_fileOffset + i + c * 4 + 1] << 8)
+                                | ((UInt32)_Bytes[_fileOffset + i + c * 4 + 2] << 16) | ((UInt32)_Bytes[_fileOffset + i + c * 4 + 3] << 24);
                         }
 
                         for (Int32 c = 0; c < 4; ++c)
@@ -452,17 +517,17 @@ namespace HexEditor
                         FreeMemoryWcharPtr(resultPtr);
                         tempStr += tempLine;
 
-                        if (i < 0x1F0)
+                        if (i < bytesAmount)
                             tempStr += '\n';
                     }
                 }
                 break;
                 default:
                 {
-                    for (Int32 i = 0; i <= 0x1F0; i += 0x10)
+                    for (Int32 i = 0; i <= bytesAmount; i += 0x10)
                     {
                         Byte[] tempBytes = new Byte[16];
-                        Array.Copy(_Bytes, i, tempBytes, 0, 16);
+                        Array.Copy(_Bytes, (Int32)_fileOffset + i, tempBytes, 0, 16);
 
                         for (Int32 c = 0; c < 16; ++c)
                         {
@@ -475,7 +540,7 @@ namespace HexEditor
                         FreeMemoryWcharPtr(resultPtr);
                         tempStr += tempLine;
 
-                        if (i < 0x1F0)
+                        if (i < bytesAmount)
                             tempStr += '\n';
                         }
                 }
