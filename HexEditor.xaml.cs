@@ -413,12 +413,40 @@ namespace HexEditor
 
                         for (Int32 c = 0; c < 8; ++c)
                         {
-                            if (tempChars[c] == 0)
-                                if (inputEncoding == (Int32)StringEncodings.UTF16LE)
-                                    tempChars[c] = '␀';
-                                else
-                                    tempChars[c] = (char)0x0024;
+                            switch ((Int32)tempChars[c])
+                            {
+                                case 0:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␀';
+                                    else
+                                        tempChars[c] = (char)0x0024;
+                                break;
+                                case 0x0A:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␤';
+                                    else
+                                        tempChars[c] = (char)0x2424;
+                                break;
+                                case 0x09:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␉';
+                                    else
+                                        tempChars[c] = (char)0x0924;
+                                break;
+                                case 0x0B:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␋';
+                                    else
+                                        tempChars[c] = (char)0x0B24;
+                                break;
+                                case 0x0D:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␍';
+                                    else
+                                        tempChars[c] = (char)0x0D24;
+                                break;
                             }
+                        }
 
                         IntPtr resultPtr = ConvertWcharStringToWcharStringUnsafe(tempChars, inputEncoding, (Int32)StringEncodings.UTF16LE);
                         StringBuilder tempLine = new StringBuilder(Marshal.PtrToStringUni(resultPtr));
@@ -445,11 +473,39 @@ namespace HexEditor
 
                         for (Int32 c = 0; c < 4; ++c)
                         {
-                            if (tempChars[c] == 0)
-                                if(inputEncoding == (Int32)StringEncodings.UTF32LE)
-                                    tempChars[c] = '␀';
-                                else
-                                    tempChars[c] = 0x00240000;
+                            switch(tempChars[c])
+                            {
+                                case 0:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␀';
+                                    else
+                                        tempChars[c] = 0x00240000;
+                                break;
+                                case 0x0A:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␤';
+                                    else
+                                        tempChars[c] = 0x24240000;
+                                break;
+                                case 0x09:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␉';
+                                    else
+                                        tempChars[c] = 0x09240000;
+                                break;
+                                case 0x0B:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␋';
+                                    else
+                                        tempChars[c] = 0x0B240000;
+                                break;
+                                case 0x0D:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␍';
+                                    else
+                                        tempChars[c] = 0x0D240000;
+                                break;
+                            }  
                         }
 
                         IntPtr resultPtr = ConvertU32charStringToWcharStringUnsafe(tempChars, inputEncoding, (Int32)StringEncodings.UTF16LE);
@@ -471,8 +527,11 @@ namespace HexEditor
 
                         for (Int32 c = 0; c < 16; ++c)
                         {
-                            if(tempBytes[c] == 0)
+                            if(tempBytes[c] == 0 || tempBytes[c] == 0x0A || tempBytes[c] == 0x0D)
                                 tempBytes[c] = 0x2E;
+                            else if((tempBytes[c] == 0x09 || tempBytes[c] == 0x0A) 
+                                    && inputEncoding < (Int32)StringEncodings.POKEMON_GEN1_ENGLISH)
+                                        tempBytes[c] = 0x20;
                         }
 
                         IntPtr resultPtr = ConvertCharStringToWcharStringUnsafe(tempBytes, inputEncoding, (Int32)StringEncodings.UTF16LE);

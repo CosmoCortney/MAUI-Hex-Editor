@@ -108,7 +108,7 @@
                 FontFamily="Consolas"
                 IsReadOnly="True"
                 IsVisible="True"
-                MaxLength="512"
+                MaxLength="555"
                 VerticalOptions="FillAndExpand" />
         </ScrollView>
     </Grid>
