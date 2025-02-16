@@ -4,7 +4,11 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:HexEditor"
-    x:Name="hexEditor">
+    x:Name="hexEditor"
+    _BaseAddress="0"
+    _IsBigEndian="False"
+    _ShowAddressArea="True"
+    _ShowTextArea="True">
 
     <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto, Auto">
 
@@ -46,6 +50,7 @@
         <Editor
             x:Name="HexEditorBytes"
             Grid.Row="1"
+            IsReadOnly="True"
             Grid.Column="1"
             BindingContext="{x:Reference hexEditor}"
             FontFamily="Consolas"

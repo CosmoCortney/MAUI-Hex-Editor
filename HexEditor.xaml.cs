@@ -161,7 +161,7 @@ namespace HexEditor
         public HexEditor()
         {
             InitializeComponent();
-            this.BindingContext = this;
+            //this.BindingContext = this;
             initTestData();
             setupEncodingPicker();
             initHexEditorBytes();
@@ -272,18 +272,38 @@ namespace HexEditor
             return result;
         }
 
+        //public bool _IsReadOnly { get; set; }
         public UInt64 _BaseAddress { get; set; }
         public bool _IsBigEndian { get; set; }
         private bool _showAddressesFR = true;
-        private bool _keyPressed = false;
-        public bool _ShowAddresses
+        public bool _ShowAddressArea
         {
             get => _showAddressesFR;
             set
             {
                 _showAddressesFR = value;
-                CurrentOffset.IsVisible = value;
-                OffsetList.IsVisible = value;
+
+                if(CurrentOffset != null)
+                    CurrentOffset.IsVisible = value;
+
+                if (OffsetList != null)
+                    OffsetList.IsVisible = value;
+            }
+        }
+        private bool _showTextFR = true;
+        public bool _ShowTextArea
+        {
+            get => _showTextFR;
+            set
+            {
+                _showTextFR = value;
+
+
+                if (EncodingPicker != null)
+                    EncodingPicker.IsVisible = value;
+
+                if (EncodedStrings != null)
+                    EncodedStrings.IsVisible = value;
             }
         }
         public byte[] _Bytes { get; set; }
@@ -470,7 +490,7 @@ namespace HexEditor
 
         private async void onHexEditTextChanged(object sender, Microsoft.Maui.Controls.TextChangedEventArgs e)
         {
-            if (!_isInitialized)
+            /*if (!_isInitialized)
                 return;
 
             await _semaphore.WaitAsync();
@@ -527,7 +547,7 @@ namespace HexEditor
             finally
             {
                 _semaphore.Release();
-            }
+            }*/
         }
 
         private async Task setByte(Int32 cursorPos, char nibble)
@@ -562,15 +582,30 @@ namespace HexEditor
             //BindableObject.Dispatcher.Dispatch
             Device.BeginInvokeOnMainThread(() =>
             {
-                //editor.TextChanged -= onHexEditTextChanged;
-                //editor.TextChanged += onHexEditTextChanged;
+                editor.TextChanged -= onHexEditTextChanged;
+                editor.Text = text;
                 tcs.SetResult(true); // Signal that the UI update is complete
+                editor.TextChanged += onHexEditTextChanged;
             });
 
             await tcs.Task; // Wait for the UI update to complete
             //_isInitialized = true;
 
             _isTextChanging = false;
+        }
+
+        public void SetBinaryData(byte[] data)
+        {
+            _Bytes = data;
+            initHexEditorBytes();
+            setOffsetArea();
+            setEncodedStrings();
+        }
+
+        public void SetBaseAddress(UInt64 baseAddress)
+        {
+            _BaseAddress = baseAddress;
+            setOffsetArea();
         }
 
         private void setupEncodingPicker()
