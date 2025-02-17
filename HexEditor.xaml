@@ -13,7 +13,7 @@
     <Grid
         x:Name="ParentGrid"
         ColumnDefinitions="Auto, Auto, Auto"
-        RowDefinitions="Auto, *">
+        RowDefinitions="Auto, Auto, *">
 
         <Entry
             x:Name="CurrentOffset"
@@ -75,6 +75,7 @@
                 IsReadOnly="True"
                 MaxLength="1537"
                 TextChanged="onHexEditTextChanged"
+                TextColor="#FFFFFF"
                 TextTransform="Uppercase"
                 VerticalOptions="FillAndExpand">
 
@@ -117,6 +118,24 @@
                 IsReadOnly="True"
                 IsVisible="True"
                 MaxLength="555"
+                TextColor="#FFFFFF"
+                VerticalOptions="FillAndExpand" />
+        </ScrollView>
+
+        <ScrollView
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            VerticalOptions="FillAndExpand">
+
+            <Editor
+                x:Name="DataView"
+                FontFamily="Consolas"
+                FontSize="12"
+                IsReadOnly="True"
+                IsVisible="True"
+                MaxLength="512"
+                TextColor="#FFFFFF"
                 VerticalOptions="FillAndExpand" />
         </ScrollView>
     </Grid>

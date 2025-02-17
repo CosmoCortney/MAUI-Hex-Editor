@@ -12,6 +12,7 @@ using Microsoft.Maui.Controls;
 using System.Security.Cryptography;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Maui.Controls;
+using System.Runtime.CompilerServices;
 
 namespace HexEditor
 {
@@ -162,6 +163,7 @@ namespace HexEditor
         {
             InitializeComponent();
             setupEncodingPicker();
+            generateDataViewText();
 
             Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("CurrentOffset", (handler, view) =>
             {
@@ -224,11 +226,13 @@ namespace HexEditor
         }
         private UInt64 _fileOffset = 0;
         private UInt64 _currentOffsetFR = 0;
+        private UInt64 _fileOffsetDirty = 0;
         public UInt64 _CurrentOffset
         {
             get => _currentOffsetFR;
             set
             {
+                _fileOffsetDirty = value - _BaseAddress;
                 _currentOffsetFR = value & 0xFFFFFFFFFFFFFFF0;
                 _fileOffset = _CurrentOffset - _BaseAddress;
                 _viewPosition = _fileOffset;
@@ -315,6 +319,7 @@ namespace HexEditor
         private void onEditorTapped(object sender, EventArgs e)
         {
             UpdateOffset();
+            generateDataViewText();
         }
 
         public void UpdateOffset()
@@ -326,7 +331,10 @@ namespace HexEditor
 
             if (((_PosBytesStringFormatted+1) % 3 == 0) && _PosBytesStringFormatted != 0)
                 ++HexEditorBytes.CursorPosition;
+
+            _fileOffsetDirty = _PosBytesRelative + _fileOffset;
         }
+
         private void onEncodingPickerIndexChanged(object sender, EventArgs e)
         {
             setEncodedStrings();
@@ -695,6 +703,146 @@ namespace HexEditor
         {
             _BaseAddress = baseAddress;
             setOffsetArea();
+        }
+
+        private void generateDataViewText()
+        {
+            if(_Bytes == null)
+                return;
+
+            string dataView = "";
+            dataView += "Bool: " + getValueAsString<bool>() + "\n";
+            dataView += "Int8: " + getValueAsString<SByte>() + "\n";
+            dataView += "UInt8: " + getValueAsString<Byte>() + "\n";
+            dataView += "Int16: " + getValueAsString<Int16>() + "\n";
+            dataView += "UInt16: " + getValueAsString<UInt16>() + "\n";
+            dataView += "Int32: " + getValueAsString<Int32>() + "\n";
+            dataView += "UInt32: " + getValueAsString<UInt32>() + "\n";
+            dataView += "Int64: " + getValueAsString<Int64>() + "\n";
+            dataView += "UInt64: " + getValueAsString<UInt64>() + "\n";
+            dataView += "Single: " + getValueAsString<float>() + "\n";
+            dataView += "Double: " + getValueAsString<double>();
+            DataView.Text = dataView;
+        }
+
+        private static T byteSwap<T>(T value) where T : unmanaged
+        {
+            Span<byte> bytes = stackalloc byte[Unsafe.SizeOf<T>()];
+            MemoryMarshal.Write(bytes, ref value);
+            bytes.Reverse();
+            return MemoryMarshal.Read<T>(bytes);
+        }
+
+        private T getValueFromBytes<T>() where T : unmanaged
+        {
+            if (_Bytes == null)
+                throw new ArgumentNullException(nameof(_Bytes));
+
+            if ((_fileOffsetDirty + (UInt64)Unsafe.SizeOf<T>()) > (UInt64)_Bytes.Length)
+                throw new ArgumentOutOfRangeException(nameof(_fileOffsetDirty));
+
+            Span<byte> span = new Span<byte>(_Bytes, (int)_fileOffsetDirty, Unsafe.SizeOf<T>());
+            Span<T> typedSpan = MemoryMarshal.Cast<byte, T>(span);
+            return typedSpan[0];
+        }
+
+        private string getValueAsString<T>() where T : unmanaged
+        {
+            T value = getValueFromBytes<T>();
+
+            if(_IsBigEndian && Unsafe.SizeOf<T>() > 1)
+                value = byteSwap(value);
+
+            string output = value.ToString() + " | 0x";
+
+            if(isIntegralType<T>() != 0)
+            { 
+                switch (isIntegralType<T>())
+                {
+                    case 1:
+                        if (typeof(T) == typeof(SByte))
+                            output += ((SByte)(object)value).ToString("X2");
+                        else
+                            output += Convert.ToByte(value).ToString("X2");
+                        break;
+                    case 2:
+                        if (typeof(T) == typeof(Int16))
+                            output += ((Int16)(object)value).ToString("X4");
+                        else
+                            output += Convert.ToUInt16(value).ToString("X4");
+                        break;
+                    case 4:
+                        if (typeof(T) == typeof(Int32))
+                            output += ((Int32)(object)value).ToString("X8");
+                        else
+                            output += Convert.ToUInt32(value).ToString("X8");
+                        break;
+                    case 8:
+                        if (typeof(T) == typeof(Int64))
+                            output += ((Int64)(object)value).ToString("X16");
+                        else
+                            output += Convert.ToUInt64(value).ToString("X16");
+                        break;
+                }
+            }
+
+            if (isFloatType<T>() != 0)
+            {
+                switch (isFloatType<T>())
+                {
+                    case 4:
+                        output += BitConverter.SingleToInt32Bits(Convert.ToSingle(value)).ToString("X");
+                    break;
+                    case 8:
+                        output += BitConverter.DoubleToInt64Bits(Convert.ToDouble(value)).ToString("X");
+                    break;
+                    //case 16:
+                    //    output += BitConverter.ToInt128(value).ToString("X");
+                    //break;
+                }
+            }
+
+            return output;
+        }
+
+        private static UInt32 isIntegralType<T>() where T : unmanaged
+        {
+            Type type = typeof(T);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Boolean:
+                    return 1;
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
+                    return 2;
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                case TypeCode.Char:
+                    return 4;
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                    return 8;
+                default:
+                    return 0;
+            }
+        }
+
+        private static UInt32 isFloatType<T>() where T : unmanaged
+        {
+            Type type = typeof(T);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Single:
+                    return 4;
+                case TypeCode.Double:
+                    return 8;
+                case TypeCode.Decimal:
+                    return 16;
+                default:
+                    return 0;
+            }
         }
 
         private void setupEncodingPicker()
