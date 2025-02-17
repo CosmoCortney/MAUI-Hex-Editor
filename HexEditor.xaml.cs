@@ -236,6 +236,21 @@ namespace HexEditor
         }
         public bool _IsBigEndian { get; set; }
         private bool _showAddressesFR = true;
+        private double _fontSizeFR = 12;
+        public double _FontSize
+        {
+            get => _fontSizeFR;
+            set
+            {
+                _fontSizeFR = value;
+                CurrentOffset.FontSize = _fontSizeFR;
+                OffsetList.FontSize = _fontSizeFR;
+                BytesHeader.FontSize = _fontSizeFR;
+                HexEditorBytes.FontSize = _fontSizeFR;
+                EncodingPicker.FontSize = _fontSizeFR;
+                EncodedStrings.FontSize = _fontSizeFR;
+            }
+        }
         public bool _ShowAddressArea
         {
             get => _showAddressesFR;
@@ -248,6 +263,11 @@ namespace HexEditor
 
                 if (OffsetList != null)
                     OffsetList.IsVisible = value;
+
+                if (ParentGrid == null)
+                    return;
+
+                ParentGrid.ColumnDefinitions[0] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
             }
         }
         private bool _showTextFR = true;
@@ -264,6 +284,11 @@ namespace HexEditor
 
                 if (EncodedStrings != null)
                     EncodedStrings.IsVisible = value;
+
+                if (ParentGrid == null)
+                    return;
+
+                ParentGrid.ColumnDefinitions[2] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
             }
         }
         public byte[] _Bytes { get; set; }
