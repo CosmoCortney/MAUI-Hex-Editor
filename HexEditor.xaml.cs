@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -293,6 +293,19 @@ namespace HexEditor
                     return;
 
                 ParentGrid.ColumnDefinitions[2] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
+            }
+        }
+        private Int32 _currentCharacterEncodingFR = 1;
+        public Int32 _CurrentCharacterEncoding
+        { 
+            get => _currentCharacterEncodingFR;
+            set
+            {
+                _currentCharacterEncodingFR = value;
+
+                for (Int32 i = 0; i < _StringEncodingPairs.Count; ++i)
+                    if (_StringEncodingPairs[i].Id == value)
+                        EncodingPicker.SelectedIndex = i;
             }
         }
         public byte[] _Bytes { get; set; }
