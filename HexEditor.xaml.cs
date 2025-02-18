@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -485,6 +485,12 @@ namespace HexEditor
                                     else
                                         tempChars[c] = (char)0x0B24;
                                 break;
+                                case 0x0C:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␌';
+                                    else
+                                        tempChars[c] = (char)0x0C24;
+                                break;
                                 case 0x0D:
                                     if (inputEncoding == (Int32)StringEncodings.UTF32LE)
                                         tempChars[c] = '␍';
@@ -545,6 +551,12 @@ namespace HexEditor
                                     else
                                         tempChars[c] = 0x0B240000;
                                 break;
+                                case 0x0C:
+                                    if (inputEncoding == (Int32)StringEncodings.UTF32LE)
+                                        tempChars[c] = '␌';
+                                    else
+                                        tempChars[c] = 0x0C240000;
+                                break;
                                 case 0x0D:
                                     if (inputEncoding == (Int32)StringEncodings.UTF32LE)
                                         tempChars[c] = '␍';
@@ -573,9 +585,9 @@ namespace HexEditor
 
                         for (Int32 c = 0; c < 16; ++c)
                         {
-                            if(tempBytes[c] == 0 || tempBytes[c] == 0x0A || tempBytes[c] == 0x0D)
+                            if(tempBytes[c] == 0 || tempBytes[c] == 0x0D)
                                 tempBytes[c] = 0x2E;
-                            else if((tempBytes[c] == 0x09 || tempBytes[c] == 0x0A) 
+                            else if((tempBytes[c] == 0x09 || tempBytes[c] == 0x0A || tempBytes[c] == 0x0B || tempBytes[c] == 0x0C) 
                                     && inputEncoding < (Int32)StringEncodings.POKEMON_GEN1_ENGLISH)
                                         tempBytes[c] = 0x20;
                         }
