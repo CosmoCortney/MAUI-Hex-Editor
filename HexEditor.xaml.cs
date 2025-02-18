@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -856,6 +856,26 @@ namespace HexEditor
                     return 16;
                 default:
                     return 0;
+            }
+        }
+
+        public void SetBytes(byte[] data, UInt64 offset)
+        {
+            if(data == null)
+                return;
+
+            UInt64 writeOffset = offset - _BaseAddress;
+
+            if ((UInt64)data.Length + writeOffset > (UInt64)_Bytes.Length)
+                return;
+
+            Array.Copy(data, 0, _Bytes, (Int32)writeOffset, data.Length);
+
+            if(offset + (UInt64)data.Length >= _CurrentOffset 
+                && offset < _CurrentOffset + ((UInt64)_Bytes.Length < 0x200 ? (UInt64)_Bytes.Length : 0x200))
+            {
+                initHexEditorBytes();
+                setEncodedStrings();
             }
         }
 
