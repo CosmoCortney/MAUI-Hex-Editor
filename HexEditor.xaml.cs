@@ -179,40 +179,40 @@ namespace HexEditor
         }
         
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)] //char* to char*
-        private static extern IntPtr ConvertCharStringToCharStringUnsafe(byte[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertCharStringToCharStringUnsafe(byte[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)] // char* to wchar_t*
-        private static extern IntPtr ConvertCharStringToWcharStringUnsafe(byte[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertCharStringToWcharStringUnsafe(byte[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)] // char* to u32char_t*
-        private static extern IntPtr ConvertCharStringToWU32charStringUnsafe(byte[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertCharStringToWU32charStringUnsafe(byte[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)] // wchar_t* to char*
-        private static extern IntPtr ConvertWcharStringToCharStringUnsafe(char[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertWcharStringToCharStringUnsafe(char[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)] // wchar_t* to wchar_t*
-        private static extern IntPtr ConvertWcharStringToWcharStringUnsafe(char[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertWcharStringToWcharStringUnsafe(char[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)] // wchar_t* to char32_t*
-        private static extern IntPtr ConvertWcharStringToU32charStringUnsafe(char[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertWcharStringToU32charStringUnsafe(char[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)] // char32_t* to char*
-        private static extern IntPtr ConvertU32charStringToCharStringUnsafe(UInt32[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertU32charStringToCharStringUnsafe(UInt32[] input, int inputEncoding, int outputEncoding);
  
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)] // char32_t* to wchar_t*
-        private static extern IntPtr ConvertU32charStringToWcharStringUnsafe(UInt32[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertU32charStringToWcharStringUnsafe(UInt32[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl)] // char32_t* to char32_t*
-        private static extern IntPtr ConvertU32charStringToU32charStringUnsafe(UInt32[] input, int inputEncoding, int outputEncoding);
+        public static extern IntPtr ConvertU32charStringToU32charStringUnsafe(UInt32[] input, int inputEncoding, int outputEncoding);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void FreeMemoryCharPtr(IntPtr ptr);
+        public static extern void FreeMemoryCharPtr(IntPtr ptr);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void FreeMemoryWcharPtr(IntPtr ptr);
+        public static extern void FreeMemoryWcharPtr(IntPtr ptr);
 
         [DllImport("MorphText.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void FreeMemoryU32charPtr(IntPtr ptr);
+        public static extern void FreeMemoryU32charPtr(IntPtr ptr);
 
         //public bool _IsReadOnly { get; set; }
         private UInt64 _baseAddressFR = 0;
@@ -319,7 +319,6 @@ namespace HexEditor
         public UInt64 _SelectedPosBytesString { get; set; }
         public UInt64 _SelectedPosBytesStringFormatted { get; set; }
         public List<StringEncodingPickerItem> _StringEncodingPairs { get; private set; }
-
         private bool _isInitialized = false;
 
         private async Task initHexEditorBytes()
@@ -361,6 +360,11 @@ namespace HexEditor
             setOffsetArea();
             setEncodedStrings();
             CurrentOffset.Text = _CurrentOffset.ToString("X");
+
+            if (SyncTarget == null)
+                return;
+
+            SyncTarget.SetCurrentOffset(_CurrentOffset);
         }
 
         private UInt32 getNextBytesAmount()
@@ -719,6 +723,15 @@ namespace HexEditor
         public void SetBinaryData(byte[] data)
         {
             _Bytes = data;
+            initHexEditorBytes();
+            setOffsetArea();
+            setEncodedStrings();
+            generateDataViewText();
+        }
+
+        public void SetCurrentOffset(UInt64 offset)
+        {
+            _CurrentOffset = offset;
             initHexEditorBytes();
             setOffsetArea();
             setEncodedStrings();
