@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -903,6 +903,18 @@ namespace HexEditor
                 initHexEditorBytes();
                 setEncodedStrings();
             }
+        }
+
+        public byte[] GetBytes(UInt64 offset, Int32 count)
+        {
+            byte[] bytes = new byte[count];
+            UInt64 readOffset = offset - _BaseAddress;
+
+            if (readOffset + (UInt64)count >= (UInt64)_Bytes.Length)
+                return null;
+
+            Array.Copy(_Bytes, (Int32)readOffset, bytes, 0, count);
+            return bytes;
         }
 
         private void setupEncodingPicker()
