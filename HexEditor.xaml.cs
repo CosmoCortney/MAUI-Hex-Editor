@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -227,6 +227,7 @@ namespace HexEditor
         private UInt64 _fileOffset = 0;
         private UInt64 _currentOffsetFR = 0;
         private UInt64 _fileOffsetDirty = 0;
+        public HexEditor SyncTarget { get; set; }
         public UInt64 _CurrentOffset
         {
             get => _currentOffsetFR;
