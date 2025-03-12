@@ -222,6 +222,14 @@ namespace HexEditor
             set 
             {
                 _baseAddressFR = value & 0xFFFFFFFFFFFFFFF0;
+
+                if(_Bytes == null)
+                    return;
+
+                if (_CurrentOffset < _baseAddressFR || _CurrentOffset >= _baseAddressFR + _currentOffsetFR)
+                {
+                    SetCurrentOffset(_baseAddressFR);
+                }
             }
         }
         private UInt64 _fileOffset = 0;
@@ -235,8 +243,13 @@ namespace HexEditor
             {
                 _fileOffsetDirty = value - _BaseAddress;
                 _currentOffsetFR = value & 0xFFFFFFFFFFFFFFF0;
-                _fileOffset = _CurrentOffset - _BaseAddress;
+                _fileOffset = value - _BaseAddress;
                 _viewPosition = _fileOffset;
+
+                if (CurrentOffset == null)
+                    return;
+
+                CurrentOffset.Text = _currentOffsetFR.ToString("X");
             }
         }
         public bool _IsBigEndian { get; set; }
