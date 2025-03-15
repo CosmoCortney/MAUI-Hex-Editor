@@ -12,8 +12,8 @@
 
     <Grid
         x:Name="ParentGrid"
-        ColumnDefinitions="Auto, Auto, Auto"
-        RowDefinitions="Auto, Auto, *">
+        ColumnDefinitions="*, Auto, Auto"
+        RowDefinitions="Auto, .5*, .25*">
 
         <Entry
             x:Name="CurrentOffset"
@@ -26,12 +26,13 @@
             HorizontalTextAlignment="Start"
             IsVisible="True"
             MaxLength="16"
-            MinimumHeightRequest="20"
+            MinimumHeightRequest="24"
             MinimumWidthRequest="70"
             Text="0"
             TextColor="#FFFFFF" />
 
         <ScrollView
+            x:Name="OffsetListScrollView"
             Grid.Row="1"
             Grid.Column="0"
             HorizontalScrollBarVisibility="Never"
@@ -45,6 +46,7 @@
                 IsReadOnly="True"
                 IsVisible="True"
                 MaxLength="512"
+                MinimumWidthRequest="80"
                 TextColor="#CCCCFF"
                 VerticalOptions="FillAndExpand" />
         </ScrollView>
@@ -62,11 +64,13 @@
             TextColor="#CCCCFF" />
 
         <ScrollView
+            x:Name="HexEditorByteScrollView"
             Grid.Row="1"
             Grid.Column="1"
             HorizontalScrollBarVisibility="Never"
             VerticalOptions="FillAndExpand"
             VerticalScrollBarVisibility="Never">
+
             <Editor
                 x:Name="HexEditorBytes"
                 BindingContext="{x:Reference hexEditor}"
@@ -105,10 +109,10 @@
         </Picker>
 
         <ScrollView
+            x:Name="EncodedStringsScrollView"
             Grid.Row="1"
             Grid.Column="2"
             HorizontalScrollBarVisibility="Never"
-            VerticalOptions="FillAndExpand"
             VerticalScrollBarVisibility="Never">
 
             <Editor
@@ -122,22 +126,28 @@
                 VerticalOptions="FillAndExpand" />
         </ScrollView>
 
-        <ScrollView
+        <!--
+            ScrollView
+            x:Name="DataViewScrollView"
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            VerticalOptions="FillAndExpand">
+            VerticalOptions="FillAndExpand"
+        -->
 
-            <Editor
-                x:Name="DataView"
-                FontFamily="Consolas"
-                FontSize="12"
-                IsReadOnly="True"
-                IsVisible="True"
-                MaxLength="512"
-                TextColor="#FFFFFF"
-                VerticalOptions="FillAndExpand" />
-        </ScrollView>
+        <Editor
+            x:Name="DataView"
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            FontFamily="Consolas"
+            FontSize="12"
+            IsReadOnly="True"
+            IsVisible="True"
+            MaxLength="512"
+            TextColor="#FFFFFF"
+            VerticalOptions="FillAndExpand" />
+        <!--  /ScrollView  -->
     </Grid>
 
 </ContentView>
