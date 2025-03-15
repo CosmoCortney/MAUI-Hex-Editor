@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Maui.Controls;
 using System.Runtime.CompilerServices;
+using System.Data;
 
 namespace HexEditor
 {
@@ -251,9 +252,6 @@ namespace HexEditor
                 _currentOffsetFR = value & 0xFFFFFFFFFFFFFFF0;
                 _fileOffset = value - _BaseAddress;
                 _viewPosition = _fileOffset;
-
-                if (CurrentOffset == null)
-                    return;
 
                 CurrentOffset.Text = _currentOffsetFR.ToString("X");
             }
@@ -697,6 +695,33 @@ namespace HexEditor
             {
                 _semaphore.Release();
             }*/
+        }
+
+        public void Reset()
+        {
+            _Bytes = null;
+            _BytesAsString = "";
+            _BytesAsStringFormatted = "";
+            OffsetList.Text = "";
+            HexEditorBytes.Text = "";
+            EncodedStrings.Text = "";
+            DataView.Text = "";
+            _PosBytesRelative = 0;
+            _PosBytesString = 0;
+            _PosBytesStringFormatted = 0;
+            _SelectedPosBytes = 0;
+            _SelectedPosBytesString = 0;
+            _SelectedPosBytesStringFormatted = 0;
+            _fileOffset = 0;
+            _fileOffsetDirty = 0;
+            _currentOffsetFR = 0;
+            _viewPosition = 0;
+            _CurrentOffset = 0;
+            _BaseAddress = 0;
+            _IsBigEndian = false;
+            _isInitialized = false;
+            CurrentOffset.Text = "0";
+            EncodingPicker.SelectedIndex = 0;
         }
 
         private async Task setByte(Int32 cursorPos, char nibble)
