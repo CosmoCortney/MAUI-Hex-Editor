@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -241,6 +241,12 @@ namespace HexEditor
             get => _currentOffsetFR;
             set
             {
+                if (CurrentOffset == null)
+                    return;
+
+                if (_Bytes == null)
+                    return;
+
                 _fileOffsetDirty = value - _BaseAddress;
                 _currentOffsetFR = value & 0xFFFFFFFFFFFFFFF0;
                 _fileOffset = value - _BaseAddress;
@@ -368,6 +374,9 @@ namespace HexEditor
 
         private void onEnterPressed(object sender, EventArgs e)
         {
+            if (_Bytes == null)
+                return;
+
             _CurrentOffset = Convert.ToUInt64(CurrentOffset.Text, 16);
             formatBytesString();
             setEditorTextAsync(HexEditorBytes, _BytesAsStringFormatted);
