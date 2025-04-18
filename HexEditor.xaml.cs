@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.Maui.Controls;
 using System.Runtime.CompilerServices;
 using System.Data;
+using System.Transactions;
 
 namespace HexEditor
 {
@@ -374,6 +375,15 @@ namespace HexEditor
         {
             if (_Bytes == null)
                 return;
+
+            UInt64 tempOffset = Convert.ToUInt64(CurrentOffset.Text, 16); ;
+            UInt64 tempLength = (UInt64)_Bytes.Length;
+
+            if (tempOffset >= tempLength)
+                if ((tempLength & 0xF) == 0)
+                    _CurrentOffset = tempLength - 0x10;
+                else
+                    _CurrentOffset = (tempLength & 0xFFFFFFFFFFFFFFF0);
 
             _CurrentOffset = Convert.ToUInt64(CurrentOffset.Text, 16);
             formatBytesString();
