@@ -836,7 +836,10 @@ namespace HexEditor
                 throw new ArgumentNullException(nameof(_Bytes));
 
             if ((_fileOffsetDirty + (UInt64)Unsafe.SizeOf<T>()) > (UInt64)_Bytes.Length)
-                throw new ArgumentOutOfRangeException(nameof(_fileOffsetDirty));
+            {
+                Span<byte> temp = new byte[Unsafe.SizeOf<T>()];
+                return MemoryMarshal.Cast<byte, T>(temp)[0];
+            }
 
             Span<byte> span = new Span<byte>(_Bytes, (int)_fileOffsetDirty, Unsafe.SizeOf<T>());
             Span<T> typedSpan = MemoryMarshal.Cast<byte, T>(span);
