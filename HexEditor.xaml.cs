@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -817,8 +817,8 @@ namespace HexEditor
             dataView += "UInt32: " + getValueAsString<UInt32>() + "\n";
             dataView += "Int64: " + getValueAsString<Int64>() + "\n";
             dataView += "UInt64: " + getValueAsString<UInt64>() + "\n";
-            dataView += "Single: " + getValueAsString<float>() + "\n";
-            dataView += "Double: " + getValueAsString<double>();
+            dataView += "Single: " + getValueAsString<float>().Replace(',', '.') + "\n";
+            dataView += "Double: " + getValueAsString<double>().Replace(',', '.');
             DataView.Text = dataView;
         }
 
