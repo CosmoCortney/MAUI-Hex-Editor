@@ -1,6 +1,0 @@
-[submodule "MorphText"]
-	path = MorphText
-	url = https://github.com/CosmoCortney/MorphText.git
-[submodule "Modules"]
-	path = Modules
-	url = https://github.com/CosmoCortney/MorphText.git
