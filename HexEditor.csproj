@@ -30,13 +30,13 @@
 	
 	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<Reference Include="HexEditor">
-			<HintPath>lib\MorphText\x64-Debug\MorphText.dll</HintPath>
+			<HintPath>Include\MorphText\out\build\x64-Debug\MorphText.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<Reference Include="HexEditor">
-			<HintPath>lib\MorphText\x64-Release\MorphText.dll</HintPath>
+			<HintPath>Include\MorphText\out\build\x64-Release\MorphText.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 	
