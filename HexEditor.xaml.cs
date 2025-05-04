@@ -290,7 +290,8 @@ namespace HexEditor
                 if (ParentGrid == null)
                     return;
 
-                ParentGrid.ColumnDefinitions[0] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
+                if(ParentGrid.ColumnDefinitions.Count > 0)
+                    ParentGrid.ColumnDefinitions[0] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
             }
         }
         private bool _showTextFR = true;
@@ -301,7 +302,6 @@ namespace HexEditor
             {
                 _showTextFR = value;
 
-
                 if (EncodingPicker != null)
                     EncodingPicker.IsVisible = value;
 
@@ -311,7 +311,8 @@ namespace HexEditor
                 if (ParentGrid == null)
                     return;
 
-                ParentGrid.ColumnDefinitions[2] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
+                if (ParentGrid.ColumnDefinitions.Count > 0)
+                    ParentGrid.ColumnDefinitions[2] = new Microsoft.Maui.Controls.ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) };
             }
         }
         private Int32 _currentCharacterEncodingFR = 1;
